@@ -1,0 +1,50 @@
+Các ngày trong tuần
+Дни недели
+Trong bao lâu?
+Как долго?
+Thứ Hai
+Понедельник
+Thứ Ba
+Вторник
+Thứ Tư
+Среда
+Thứ Năm
+Четверг
+Thứ Sáu
+Пятница
+Thứ Bảy
+Суббота
+Chủ Nhật
+Воскресенье
+Hôm qua
+Вчера
+Hôm nay
+Сегодня
+Ngày mai
+Завтра
+Các tháng trong năm
+Названия месяцев
+Tháng Giêng
+Январь
+Tháng Hai
+Февраль
+Tháng Ba
+Март
+Tháng Tư
+Апрель
+Tháng Năm
+Май
+Tháng Sáu
+Июнь
+Tháng Bảy
+Июль
+Tháng Tám
+Август
+Tháng Chín
+Сентябрь
+Tháng Mười
+Октябрь
+Tháng Mười một
+Ноябрь
+Tháng Mười hai
+Декабрь
