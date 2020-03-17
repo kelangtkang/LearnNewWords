@@ -19,8 +19,7 @@ CuaSoChinh::CuaSoChinh()
     m_next -> setCursor(Qt::PointingHandCursor);
 
     m_preview = new QPushButton("<", this);
-    m_preview -> setFont(QFont("AIGDT", 10, QFont::Bold
-                               ));
+    m_preview -> setFont(QFont("AIGDT", 10, QFont::Bold));
     m_preview -> setFixedSize(50, 22);
     m_preview -> setCursor(Qt::PointingHandCursor);
 
