@@ -4,17 +4,6 @@ using namespace std;
 
 NapDuLieu::NapDuLieu() // Nap tu vao Array[][]
 {
-    /*
-    m_nTuMoi[0][0] = "1";
-    m_nTuMoi[0][1] = "A";
-    m_nTuMoi[1][0] = "123";
-    m_nTuMoi[1][1] = "ABC";
-    m_nTuMoi[2][0] = "123456789";
-    m_nTuMoi[2][1] = "ABCDEFGHI";
-    m_nTuMoi[3][0] = "уголь горизонтального обстрела";
-    m_nTuMoi[3][1] = "Goc tam";
-    */
-
 //    ifstream Data("Data.txt");
     ifstream Data("D:/Users/Ghost/Desktop/Data.txt");
 

@@ -10,8 +10,7 @@ int main(int argc, char *argv[])
 
     CuaSoChinh cuaSo;
     cuaSo.setWindowTitle("Русский Язык");
-//    cuaSo.setWindowFlags(Qt::WindowStaysOnTopHint);
-    cuaSo.resize(500, 180);
+    cuaSo.resize(400, 150);
     cuaSo.show();
 
     return app.exec();

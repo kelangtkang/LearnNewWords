@@ -1,80 +1,107 @@
 #include "cuasochinh.h"
 #include "napdulieu.h"
+//#include <QtWidgets>
 
 using namespace std;
 
-CuaSoChinh::CuaSoChinh() : QWidget()
+CuaSoChinh::CuaSoChinh()
 {
-//    setFixedSize(300, 150);
+// Tao cua so
+    QWidget *widget = new QWidget;
+    setCentralWidget(widget); // Importance
+
     this -> setWindowFlags(Qt::WindowStaysOnTopHint);
 
-    // Tao Button
+// Tao Button
     m_next = new QPushButton("Tu tiep theo", this);
     m_next -> setFont(QFont("Calibri", 10));
-    m_next -> setCursor(Qt::PointingHandCursor); //    m_preview -> setGeometry(0,130,80,20);
+    m_next -> setCursor(Qt::PointingHandCursor);
 
     m_preview = new QPushButton("Tu truoc do", this);
     m_preview -> setFont(QFont("Calibri", 10));
     m_preview -> setCursor(Qt::PointingHandCursor);
 
-    m_ngaFont = new QPushButton("Font 1", this);
-    m_ngaFont -> setFont(QFont("Calibri", 10));
-    m_ngaFont -> setCursor(Qt::PointingHandCursor);
-
-    m_vietFont = new QPushButton("Font 2", this);
-    m_vietFont -> setFont(QFont("Calibri", 10));
-    m_vietFont -> setCursor(Qt::PointingHandCursor);
-
-    m_ngaColor = new QPushButton("Color 1", this);
-    m_ngaColor -> setFont(QFont("Calibri", 10));
-    m_ngaColor -> setCursor(Qt::PointingHandCursor);
-
-    m_vietColor = new QPushButton("Color 2", this);
-    m_vietColor -> setFont(QFont("Calibri", 10));
-    m_vietColor -> setCursor(Qt::PointingHandCursor);
-
-    m_windowColor = new QPushButton("Background", this);
-    m_windowColor -> setFont(QFont("Calibri", 10));
-    m_windowColor -> setCursor(Qt::PointingHandCursor);
+// Tao CheckBox
+//    m_setOnTop = new QCheckBox(tr("On Top"));
 
 // Tao QLabel
-    m_tiengNga = new QLabel("Русский Язык",this);
-    m_tiengNga -> setFont(QFont("Segoe UI",26));
-    m_tiengNga -> setAlignment(Qt::AlignCenter);//    m_tiengNga ->setStyleSheet("QLabel { background-color : red; color : blue; }");
+    m_tiengNga = new QLabel("Русский Язык", this);
+    m_tiengNga -> setFont(QFont("Segoe UI", 26, QFont::Bold));
+    m_tiengNga -> setAlignment(Qt::AlignCenter);
 
     m_tiengViet = new QLabel("Tiếng Việt", this);
     m_tiengViet -> setFont(QFont("Times New Roman",14));
-    m_tiengViet -> setAlignment(Qt::AlignCenter);//    m_tiengViet -> setStyleSheet("color: green;");
-
-// Sap xep Layout
-    QHBoxLayout *hDuoi = new QHBoxLayout();
-    hDuoi -> setAlignment(Qt::AlignBottom);
-    QHBoxLayout *hTren = new QHBoxLayout();
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox -> setSpacing(15);
-
-    hTren -> addWidget(m_ngaFont);
-    hTren -> addWidget(m_vietFont);
-    hTren -> addWidget(m_ngaColor);
-    hTren -> addWidget(m_vietColor);
-    hTren -> addWidget(m_windowColor);
-    hDuoi -> addWidget(m_preview,1,Qt::AlignLeft);
-    hDuoi -> addWidget(m_next,0,Qt::AlignRight);
-    vbox -> addLayout(hTren);
-    vbox -> addWidget(m_tiengNga);
-    vbox -> addWidget(m_tiengViet);
-    vbox -> addLayout(hDuoi);
+    m_tiengViet -> setAlignment(Qt::AlignCenter);
 
 // Ket noi tin hieu
     QObject::connect(m_next, SIGNAL(clicked()), this, SLOT(hienTuSau()));
     QObject::connect(m_preview, SIGNAL(clicked()), this, SLOT(hienTuTruoc()));
-    QObject::connect(m_ngaFont, SIGNAL(clicked()), this, SLOT(setFontNga()));
-    QObject::connect(m_vietFont, SIGNAL(clicked()), this, SLOT(setFontViet()));
-    QObject::connect(m_ngaColor, SIGNAL(clicked()), this, SLOT(ngaColor()));
-    QObject::connect(m_vietColor, SIGNAL(clicked()), this, SLOT(vietColor()));
-    QObject::connect(m_windowColor, SIGNAL(clicked()), this, SLOT(windowColor()));
+//    QObject::connect(m_setOnTop, SIGNAL(clicked()), this, SLOT(setOnTop()));
 
+// Sap xep Layout
+    QHBoxLayout *hDuoi = new QHBoxLayout();
+    hDuoi -> setAlignment(Qt::AlignBottom);
+    QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox -> setSpacing(15);
+
+    hDuoi -> addWidget(m_preview,1,Qt::AlignLeft);
+    hDuoi -> addWidget(m_next,0,Qt::AlignRight);
+    vbox -> addWidget(m_tiengNga);
+    vbox -> addWidget(m_tiengViet);
+    vbox -> addLayout(hDuoi);
+    widget -> setLayout(vbox); // Importance
+
+    createMenu();
     m_count = -1; // Gia tri ban dau cua bien chay
+}
+
+void CuaSoChinh::createMenu() // Tao Menu
+{
+// Create Action
+    m_ngaFont = new QAction("Font tiếng Nga", this);
+    m_ngaFont -> setFont(QFont("Calibri", 12));
+
+    m_vietFont = new QAction("Font tiếng Việt", this);
+    m_vietFont -> setFont(QFont("Calibri", 12));
+
+    m_ngaColor = new QAction("Màu chữ tiếng Nga", this);
+    m_ngaColor -> setFont(QFont("Calibri", 12));
+
+    m_vietColor = new QAction("Màu chữ tiếng Việt", this);
+    m_vietColor -> setFont(QFont("Calibri", 12));
+
+    m_windowColor = new QAction("Màu nền cửa sổ", this);
+    m_windowColor -> setFont(QFont("Calibri", 12));
+
+    m_setOnTop = new QAction("Set On Top", this);
+    m_setOnTop -> setCheckable(true);
+    m_setOnTop -> setChecked(false);
+
+// Create Menu
+    m_font = new QMenu();
+    m_font = menuBar() -> addMenu("&Font");
+    m_font -> addAction(m_ngaFont);
+    m_font -> addAction(m_vietFont);
+
+    m_color = new QMenu();
+    m_color = menuBar() -> addMenu(("&Color"));
+    m_color -> addAction(m_ngaColor);
+    m_color -> addAction(m_vietColor);
+    m_color -> addAction(m_windowColor);
+
+    m_onTop = new QMenu();
+    m_onTop = menuBar() -> addMenu("&Set On Top");
+    m_onTop -> addAction(m_setOnTop);
+
+// Ket noi tin hieu
+    QObject::connect(m_ngaFont, SIGNAL(triggered()), this, SLOT(setFontNga()));
+    QObject::connect(m_vietFont, SIGNAL(triggered()), this, SLOT(setFontViet()));
+    QObject::connect(m_ngaColor, SIGNAL(triggered()), this, SLOT(ngaColor()));
+    QObject::connect(m_vietColor, SIGNAL(triggered()), this, SLOT(vietColor()));
+    QObject::connect(m_windowColor, SIGNAL(triggered()), this, SLOT(windowColor()));
+    QObject::connect(m_setOnTop, SIGNAL(triggered()), this, SLOT(setOnTop()));
+//    QObject::connect(m_ngaFont, &QAction::triggered, this, &CuaSoChinh::setFontNga());
+
 }
 
 void CuaSoChinh::hienTuSau()
@@ -112,10 +139,15 @@ void CuaSoChinh::hienTuTruoc()
     m_tiengViet -> adjustSize();
 }
 
+void CuaSoChinh::setOnTop()
+{
+//    this -> setWindowFlags(Qt::WindowStaysOnTopHint);
+}
+
 void CuaSoChinh::setFontNga() // Doi font chu tieng Nga
 {
     bool ok;
-    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Segoe UI", 26), this);
+    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Segoe UI", 26, QFont::Bold), this);
     if (ok)
     {
         m_tiengNga -> setFont(kieuChu);
