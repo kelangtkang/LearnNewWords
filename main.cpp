@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <string>
 #include "cuasochinh.h"
-#include "napdulieu.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     CuaSoChinh cuaSo;
     cuaSo.setWindowTitle("Русский Язык");
-    cuaSo.resize(400, 150);
+    cuaSo.setMinimumSize(400, 170);
     cuaSo.show();
 
     return app.exec();

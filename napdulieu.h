@@ -11,7 +11,7 @@ class NapDuLieu : public QWidget
     Q_OBJECT
 
 public:
-    NapDuLieu();
+    NapDuLieu(int);
     QString getTiengNga() const;
     QString getTiengViet() const;
 
