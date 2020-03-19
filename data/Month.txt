@@ -1,0 +1,26 @@
+Названия месяцев
+Các tháng trong năm
+Январь
+Tháng Giêng
+Февраль
+Tháng Hai
+Март
+Tháng Ba
+Апрель
+Tháng Tư
+Май
+Tháng Năm
+Июнь
+Tháng Sáu
+Июль
+Tháng Bảy
+Август
+Tháng Tám
+Сентябрь
+Tháng Chín
+Октябрь
+Tháng Mười
+Ноябрь
+Tháng Mười một
+Декабрь
+Tháng Mười hai

@@ -2,29 +2,42 @@
 #define CUASOCHINH_H
 
 #include <QApplication>
-#include <QWidget>
 #include <QMainWindow>
-#include <QPushButton>
-#include <QSettings>
-#include <QComboBox>
+#include <QWidget>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+
+#include <QPushButton>
+#include <QComboBox>
 #include <QMenuBar>
 #include <QMenu>
 #include <QLabel>
+
 #include <QColor>
 #include <QFontDialog>
 #include <QColorDialog>
-#include <QString>
 
-class CuaSoChinh : public QMainWindow //: public QWidget
+#include <QString>
+#include <QTextStream>
+#include <QFile>
+#include <QDir>
+
+#include <string>
+#include <vector>
+#include <fstream>
+
+class CuaSoChinh : public QMainWindow
 {
     Q_OBJECT
 
 public:
     CuaSoChinh();
+    void napDuLieu(int);
+    void createGUI();
+    void createMenu();
 
 public slots:
+    void changeTopic(int);
     void hienTuSau();
     void hienTuTruoc();
     void setFontNga();
@@ -33,31 +46,25 @@ public slots:
     void ngaColor();
     void vietColor();
     void windowColor();
-    void doiChuDe(int i);
 
 private:
-    void createMenu();
+    int m_index;
+    int m_indexComboBox;
+    QFileInfoList m_listData;
+
+    std::vector <QString> m_vectorRus;
+    std::vector <QString> m_vectorVi;
 
     QPushButton *m_preview;
     QPushButton *m_next;
-    QAction *m_ngaFont;
-    QAction *m_vietFont;
-    QAction *m_ngaColor;
-    QAction *m_vietColor;
-    QAction *m_windowColor;
+
+    QAction *m_addTopic, *m_exit;
+    QAction *m_ngaFont, *m_vietFont;
+    QAction *m_ngaColor, *m_vietColor, *m_windowColor;
     QAction *m_setOnTop;
-    QAction *m_ngayThang;
-    QAction *m_soDem;
-    QAction *m_soThuTu;
-//    QCheckBox *m_setOnTop;
-    QMenu *m_font;
-    QMenu *m_color;
-    QMenu *m_onTop;
+
     QComboBox *m_combo;
-    QLabel *m_tiengNga;
-    QLabel *m_tiengViet;
-    int m_count;
-    int m_countComboBox;
+    QLabel *m_labelRus, *m_labelVi;
 };
 
 #endif // CUASOCHINH_H

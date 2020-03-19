@@ -1,0 +1,24 @@
+Дни недели
+Các ngày trong tuần
+Как долго?
+Trong bao lâu?
+Понедельник
+Thứ Hai
+Вторник
+Thứ Ba
+Среда
+Thứ Tư
+Четверг
+Thứ Năm
+Пятница
+Thứ Sáu
+Суббота
+Thứ Bảy
+Воскресенье
+Chủ Nhật
+Вчера
+Hôm qua
+Сегодня
+Hôm nay
+Завтра
+Ngày mai

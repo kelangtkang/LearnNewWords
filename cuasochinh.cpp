@@ -1,16 +1,142 @@
-#include "cuasochinh.h"
-#include "napdulieu.h"
+﻿#include "cuasochinh.h"
+#include <vector>
+#include <QDebug>
+#include <QFileInfo>
 
 using namespace std;
 
 CuaSoChinh::CuaSoChinh()
 {
-    // Tao cua so
-    QWidget *widget = new QWidget;
-    setCentralWidget(widget); // Importance
+    createGUI();
+    createMenu();
+    m_indexComboBox = 0;
+}
 
-    // Tao icon
-    setWindowIcon(QIcon("icon.png"));
+void CuaSoChinh::hienTuSau()
+{
+    if(m_indexComboBox !=0)
+    {
+        m_index ++;
+        if (m_index < int(m_vectorRus.size()))
+        {
+            m_labelRus -> setText(m_vectorRus[m_index]);
+            m_labelRus -> adjustSize();
+            m_labelVi -> setText(m_vectorVi[m_index]);
+            m_labelVi -> adjustSize();
+        }
+        else
+        {
+            m_labelRus -> setText(m_vectorRus[0]);
+            m_labelRus -> adjustSize();
+            m_labelVi -> setText(m_vectorVi[0]);
+            m_labelVi -> adjustSize();
+            m_index = 0;
+        }
+    }
+}
+
+void CuaSoChinh::hienTuTruoc()
+{
+    if(m_indexComboBox !=0)
+    {
+        m_index --;
+        if (m_index >= 0)
+        {
+            m_labelRus -> setText(m_vectorRus[m_index]);
+            m_labelRus -> adjustSize();
+            m_labelVi -> setText(m_vectorVi[m_index]);
+            m_labelVi -> adjustSize();
+        }
+        else
+        {
+            m_labelRus -> setText(m_vectorRus[int(m_vectorRus.size()) - 1]);
+            m_labelRus -> adjustSize();
+            m_labelVi -> setText(m_vectorVi[int(m_vectorRus.size()) - 1]);
+            m_labelVi -> adjustSize();
+            m_index = int(m_vectorRus.size()) - 1;
+        }
+    }
+}
+
+void CuaSoChinh::changeTopic(int iComboBox)
+{
+    m_indexComboBox = iComboBox;
+
+    if(iComboBox != 0)
+    {
+        QString link = m_listData[iComboBox - 1].filePath();
+        qDebug() << iComboBox << link;
+
+        QFile Data(link);
+        m_vectorVi.clear();
+        m_vectorRus.clear();
+
+        if(Data.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream  out(&Data);
+            while (!out.atEnd())
+            {
+                m_vectorRus.push_back(out.readLine());
+                m_vectorVi.push_back(out.readLine());
+            }
+            Data.close();
+        }
+
+        m_labelRus -> setText(m_vectorRus[0]);
+        m_labelRus -> adjustSize();
+        m_labelVi -> setText(m_vectorVi[0]);
+        m_labelVi -> adjustSize();
+
+        m_index = 0;
+    }
+    else
+    {
+        m_labelRus -> setText("sdf");
+        m_labelVi -> setText("sdf");
+    }
+}
+
+void CuaSoChinh::setOnTop() //Giu cua so phia tren
+{
+    if (m_setOnTop -> isChecked())
+    {
+        this -> setWindowFlags(Qt::WindowStaysOnTopHint);
+    }
+    else
+    {
+        this -> setWindowFlags(Qt::WindowStaysOnBottomHint);
+    }
+    show();
+}
+
+void CuaSoChinh::setFontNga() //Doi font chu tieng Nga
+{
+    bool ok;
+    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Segoe UI", 26, QFont::Bold), this);
+    if (ok)
+    {
+        m_labelRus -> setFont(kieuChu);
+        m_labelRus -> adjustSize();
+    }
+}
+
+void CuaSoChinh::setFontViet() //Doi font chu tieng Viet
+{
+    bool ok;
+    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Times New Roman", 14), this);
+    if (ok)
+    {
+        m_labelVi -> setFont(kieuChu);
+        m_labelVi-> adjustSize();
+    }
+}
+
+void CuaSoChinh::createGUI()
+{
+    QWidget *widget = new QWidget; // Tao cua so
+    setCentralWidget(widget); //Importance
+
+    setWindowIcon(QIcon("icon.png")); //Tao icon
 
     // Tao Button
     m_next = new QPushButton(">", this);
@@ -24,93 +150,88 @@ CuaSoChinh::CuaSoChinh()
     m_preview -> setCursor(Qt::PointingHandCursor);
 
     // Tao QLabel
-    m_tiengNga = new QLabel("Русский Язык", this);
-    m_tiengNga -> setFont(QFont("Segoe UI", 26, QFont::Bold));
-    m_tiengNga -> setAlignment(Qt::AlignCenter);
+    m_labelRus = new QLabel("Русский Язык", this);
+    m_labelRus -> setFont(QFont("Segoe UI", 26, QFont::Bold));
+    m_labelRus -> setAlignment(Qt::AlignCenter);
 
-    m_tiengViet = new QLabel("Tiếng Việt", this);
-    m_tiengViet -> setFont(QFont("Times New Roman",14));
-    m_tiengViet -> setAlignment(Qt::AlignCenter);
+    m_labelVi = new QLabel("Tiếng Việt", this);
+    m_labelVi -> setFont(QFont("Times New Roman",14));
+    m_labelVi -> setAlignment(Qt::AlignCenter);
 
     // Tao Combo Box
     m_combo = new QComboBox(this);
     m_combo -> setFixedSize(110, 20);
-
     m_combo -> addItem("Chọn chủ đề");
-    m_combo -> addItem("Số đếm");
-    m_combo -> addItem("Số thứ tự");
-    m_combo -> addItem("Ngày - Tháng");
-    m_combo -> addItem("Động từ");
-    m_combo -> addItem("Tính từ");
-    m_combo -> addItem("Súng pháo");
-    m_combo -> addItem("Đạn dược");
-    m_combo -> addItem("Tên lửa");
-    m_combo -> addItem("Kỹ thuật");
+
+    QDir directory("data");
+
+    m_listData = directory.entryInfoList(QDir::Files);
+    foreach (QFileInfo filename, m_listData)
+    {
+        qDebug() << filename.filePath();//.baseName();
+        m_combo -> addItem(filename.baseName());
+    }
+
+    // Sap xep Layout
+    QHBoxLayout *layoutNgang = new QHBoxLayout();
+    layoutNgang -> setAlignment(Qt::AlignBottom);
+    QVBoxLayout *layoutDoc = new QVBoxLayout(this);
+    layoutDoc -> setSpacing(15);
+
+    layoutNgang -> addWidget(m_combo,0, Qt::AlignLeft);
+    layoutNgang -> addWidget(m_preview,1,Qt::AlignRight);
+    layoutNgang -> addWidget(m_next,0,Qt::AlignRight);
+    layoutDoc -> addWidget(m_labelRus);
+    layoutDoc -> addWidget(m_labelVi);
+    layoutDoc -> addLayout(layoutNgang);
+    widget -> setLayout(layoutDoc); // Importance
 
     // Ket noi tin hieu
     QObject::connect(m_next, SIGNAL(clicked()), this, SLOT(hienTuSau()));
     QObject::connect(m_preview, SIGNAL(clicked()), this, SLOT(hienTuTruoc()));
-    QObject::connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(doiChuDe(int)));
-
-    // Sap xep Layout
-    QHBoxLayout *hDuoi = new QHBoxLayout();
-    hDuoi -> setAlignment(Qt::AlignBottom);
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox -> setSpacing(15);
-
-    hDuoi -> addWidget(m_combo,0, Qt::AlignLeft);
-    hDuoi -> addWidget(m_preview,1,Qt::AlignRight);
-    hDuoi -> addWidget(m_next,0,Qt::AlignRight);
-    vbox -> addWidget(m_tiengNga);
-    vbox -> addWidget(m_tiengViet);
-    vbox -> addLayout(hDuoi);
-    widget -> setLayout(vbox); // Importance
-
-    createMenu();
-    m_count = -1; // Gia tri ban dau cua bien chay
+    QObject::connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTopic(int)));
 }
 
-void CuaSoChinh::createMenu() // Tao Menu
+void CuaSoChinh::createMenu() //Tao Menu
 {
-    // Create Action
-    QPixmap newpix("D:/Users/Ghost/Desktop/First App/icon.png");
+    QPixmap newpix(":/icon/icon.ico");
+    QFont font = QFont("Calibri", 12);
+
+    m_addTopic = new QAction("Thêm chủ đề");
+    m_exit = new QAction("Exit");
+    QMenu *menuFile = new QMenu;
+    menuFile = menuBar() -> addMenu("&File");
+    menuFile -> addAction(m_addTopic);
+    menuFile -> addAction(m_exit);
 
     m_ngaFont = new QAction(newpix, "Font tiếng Nga", this);
-    m_ngaFont -> setFont(QFont("Calibri", 12));
-
+    m_ngaFont -> setFont(font);
     m_vietFont = new QAction("Font tiếng Việt", this);
-    m_vietFont -> setFont(QFont("Calibri", 12));
+    m_vietFont -> setFont(font);
+    QMenu *menuFont = new QMenu();
+    menuFont = menuBar() -> addMenu("&Font");
+    menuFont -> addAction(m_ngaFont);
+    menuFont -> addAction(m_vietFont);
 
     m_ngaColor = new QAction("Màu chữ tiếng Nga", this);
-    m_ngaColor -> setFont(QFont("Calibri", 12));
-
+    m_ngaColor -> setFont(font);
     m_vietColor = new QAction("Màu chữ tiếng Việt", this);
-    m_vietColor -> setFont(QFont("Calibri", 12));
-
+    m_vietColor -> setFont(font);
     m_windowColor = new QAction("Màu nền cửa sổ", this);
-    m_windowColor -> setFont(QFont("Calibri", 12));
+    m_windowColor -> setFont(font);
+    QMenu *menuColor = new QMenu();
+    menuColor = menuBar() -> addMenu(("&Color"));
+    menuColor -> addAction(m_ngaColor);
+    menuColor -> addAction(m_vietColor);
+    menuColor -> addAction(m_windowColor);
 
     m_setOnTop = new QAction("Set On Top", this);
     m_setOnTop -> setCheckable(true);
     m_setOnTop -> setChecked(false);
+    QMenu *onTop = new QMenu();
+    onTop = menuBar() -> addMenu("&On Top");
+    onTop -> addAction(m_setOnTop);
 
-    // Create Menu
-    m_font = new QMenu();
-    m_font = menuBar() -> addMenu("&Font");
-    m_font -> addAction(m_ngaFont);
-    m_font -> addAction(m_vietFont);
-
-    m_color = new QMenu();
-    m_color = menuBar() -> addMenu(("&Color"));
-    m_color -> addAction(m_ngaColor);
-    m_color -> addAction(m_vietColor);
-    m_color -> addAction(m_windowColor);
-
-    m_onTop = new QMenu();
-    m_onTop = menuBar() -> addMenu("&On Top");
-    m_onTop -> addAction(m_setOnTop);
-
-    // Ket noi tin hieu
     QObject::connect(m_ngaFont, SIGNAL(triggered()), this, SLOT(setFontNga()));
     QObject::connect(m_vietFont, SIGNAL(triggered()), this, SLOT(setFontViet()));
     QObject::connect(m_ngaColor, SIGNAL(triggered()), this, SLOT(ngaColor()));
@@ -119,123 +240,23 @@ void CuaSoChinh::createMenu() // Tao Menu
     QObject::connect(m_setOnTop, SIGNAL(triggered()), this, SLOT(setOnTop()));
 }
 
-void CuaSoChinh::doiChuDe(int i)
-{
-    if (i == 1)
-    {
-        m_countComboBox = 0;
-    }
-    else if (i == 2)
-    {
-        m_countComboBox = 1;
-    }
-    else if (i == 3)
-    {
-        m_countComboBox = 2;
-    }
-    else if (i == 3){}
-    else if (i == 4){}
-    else if (i == 5){}
-    else if (i == 6){}
-    else if (i == 7){}
-    else if (i == 8){}
-    else if (i == 9){}
-    m_count = 0;
-    NapDuLieu tuMoi(m_countComboBox);
-    tuMoi.ChuyenTu(m_count);
-    m_tiengNga -> setText(tuMoi.getTiengNga());
-    m_tiengNga -> adjustSize();
-    m_tiengViet -> setText(tuMoi.getTiengViet());
-    m_tiengViet -> adjustSize();
-}
-
-void CuaSoChinh::hienTuSau()
-{
-    m_count ++;
-    NapDuLieu tuMoi(m_countComboBox);
-    tuMoi.ChuyenTu(m_count);
-    if(tuMoi.getTiengNga() == "")
-    {
-        m_count = 0;
-        tuMoi.ChuyenTu(m_count);
-    }
-    else{}
-    m_tiengNga -> setText(tuMoi.getTiengNga());
-    m_tiengNga -> adjustSize();
-    m_tiengViet -> setText(tuMoi.getTiengViet());
-    m_tiengViet -> adjustSize();
-}
-
-void CuaSoChinh::hienTuTruoc()
-{
-    if(m_count <= 0)
-    {
-        m_count = 0;
-    }
-    else
-    {
-        m_count --;
-    }
-    NapDuLieu tuMoi(m_countComboBox);
-    tuMoi.ChuyenTu(m_count);
-    m_tiengNga -> setText(tuMoi.getTiengNga());
-    m_tiengNga -> adjustSize();
-    m_tiengViet -> setText(tuMoi.getTiengViet());
-    m_tiengViet -> adjustSize();
-}
-
-void CuaSoChinh::setOnTop() // Giu cua so phia tren
-{
-    if (m_setOnTop -> isChecked())
-    {
-        this -> setWindowFlags(Qt::WindowStaysOnTopHint);
-    }
-    else
-    {
-        this -> setWindowFlags(Qt::WindowStaysOnBottomHint);
-    }
-    show();
-}
-
-void CuaSoChinh::setFontNga() // Doi font chu tieng Nga
-{
-    bool ok;
-    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Segoe UI", 26, QFont::Bold), this);
-    if (ok)
-    {
-        m_tiengNga -> setFont(kieuChu);
-        m_tiengNga -> adjustSize();
-    }
-}
-
-void CuaSoChinh::setFontViet() // Doi font chu tieng Viet
-{
-    bool ok;
-    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Times New Roman", 14), this);
-    if (ok)
-    {
-        m_tiengViet -> setFont(kieuChu);
-        m_tiengViet-> adjustSize();
-    }
-}
-
-void CuaSoChinh::ngaColor() // Doi mau chu tieng Nga
+void CuaSoChinh::ngaColor() //Doi mau chu tieng Nga
 {
     QColor mau = QColorDialog::getColor(Qt::black, this);
     QPalette bangMau;
     bangMau.setColor(QPalette::WindowText, mau);
-    m_tiengNga -> setPalette(bangMau);
+    m_labelRus -> setPalette(bangMau);
 }
 
-void CuaSoChinh::vietColor() // Doi mau chu tieng Viet
+void CuaSoChinh::vietColor() //Doi mau chu tieng Viet
 {
     QColor mau = QColorDialog::getColor(Qt::black, this);
     QPalette bangMau;
     bangMau.setColor(QPalette::WindowText, mau);
-    m_tiengViet -> setPalette(bangMau);
+    m_labelVi -> setPalette(bangMau);
 }
 
-void CuaSoChinh::windowColor() // Doi mau nen cua so
+void CuaSoChinh::windowColor() //Doi mau nen cua so
 {
     QColor mau = QColorDialog::getColor(Qt::white, this);
     QPalette bangMau;
