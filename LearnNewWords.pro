@@ -1,15 +1,24 @@
 QT += widgets
 
 SOURCES += \
-    addtopic.cpp \
+    dialogaddtopic.cpp \
+    edittopic.cpp \
     main.cpp \
-    cuasochinh.cpp
+    cuasochinh.cpp \
+    options.cpp \
+    topic.cpp
 
 HEADERS += \
-    addtopic.h \
-    cuasochinh.h
+    cuasochinh.h \
+    dialogaddtopic.h \
+    edittopic.h \
+    options.h \
+    topic.h
 
 RESOURCES += \
     Resource.qrc
 
 DISTFILES +=
+
+FORMS += \
+    dialogaddtopic.ui

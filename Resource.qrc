@@ -1,5 +1,18 @@
 <RCC>
     <qresource prefix="/">
-        <file>icon/icon.ico</file>
+        <file>icon/Beat_2000x2000.svg</file>
+        <file>icon/Beat_64x64.png</file>
+        <file>icon/settings-button.png</file>
+        <file>icon/reset-button.png</file>
+        <file>icon/remove-button.png</file>
+        <file>icon/icon-button.png</file>
+        <file>icon/GhostWhite_64x64.png</file>
+        <file>icon/GhostBlack_64x64.png</file>
+        <file>icon/folder-button.png</file>
+        <file>icon/edit-button.png</file>
+        <file>icon/delete-button.png</file>
+        <file>icon/create-button.png</file>
+        <file>icon/close-button.png</file>
+        <file>icon/cancel-button.png</file>
     </qresource>
 </RCC>

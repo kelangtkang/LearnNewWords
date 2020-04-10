@@ -1,35 +1,114 @@
 ﻿#include "cuasochinh.h"
-#include <vector>
+
 #include <QDebug>
-#include <QFileInfo>
 
 using namespace std;
 
 CuaSoChinh::CuaSoChinh()
 {
+    m_indexComboBox = 0;
+    this -> adjustSize();
+    m_directory = QDir("data");
+    m_topic = new Topic;
+    QObject::connect(m_topic, SIGNAL(signalUpdateTopic()), this, SLOT(slotUpdateTopic()));
+
     createGUI();
     createMenu();
-    m_indexComboBox = 0;
+    readSettings();
+}
+
+void CuaSoChinh::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event);
+    writeSettings();
+}
+
+void CuaSoChinh::writeSettings()
+{
+    QSettings setting("Company", "LearnNewWords");
+    setting.beginGroup("MainWindow");
+
+    QFont fontRus = m_labelRus -> font();
+    setting.setValue("fontRusFamily", fontRus.family());
+    setting.setValue("fontRusSize", fontRus.pointSize());
+    setting.setValue("fontRusBold", fontRus.bold());
+    setting.setValue("fontRusItalic", fontRus.italic());
+
+    QFont fontVi = m_labelVi -> font();
+    setting.setValue("fontViFamily", fontVi.family());
+    setting.setValue("fontViSize", fontVi.pointSize());
+    setting.setValue("fontViBold", fontVi.bold());
+    setting.setValue("fontViItalic", fontVi.italic());
+
+    QColor colorTextRus = m_labelRus -> palette().color(QPalette::WindowText);
+    setting.setValue("colorTextRus", colorTextRus.name());
+
+    QColor colorTextVi = m_labelVi -> palette().color(QPalette::WindowText);
+    setting.setValue("colorTextVi", colorTextVi.name());
+
+    QColor colorWindow = this -> palette().color(QPalette::Window);
+    setting.setValue("colorWindow", colorWindow.name());
+
+    setting.setValue("size", size());
+    setting.setValue("pos", pos());
+    setting.endGroup();
+}
+
+void CuaSoChinh::readSettings()
+{
+    QSettings setting("Company", "LearnNewWords");
+    setting.beginGroup("MainWindow");
+
+    resize(setting.value("size", QSize(400, 200)).toSize());
+    move(setting.value("pos", QPoint(300, 300)).toPoint());
+
+    QString fontRusFamily = setting.value("fontRusFamily", "Segoe UI").toString();
+    int fontRusSize = setting.value("fontRusSize", 26).toInt();
+    bool fontRusBold = setting.value("fontRusBold", false).toBool();
+    bool fontRusItalic = setting.value("fontRusItalic", false).toBool();
+    QFont fontRus(fontRusFamily, fontRusSize);
+    fontRus.setBold(fontRusBold);
+    fontRus.setItalic(fontRusItalic);
+    m_labelRus -> setFont(fontRus);
+
+    QString fontViFamily = setting.value("fontViFamily", "Segoe UI").toString();
+    int fontViSize = setting.value("fontViSize", 26).toInt();
+    bool fontViBold = setting.value("fontViBold", false).toBool();
+    bool fontViItalic = setting.value("fontViItalic", false).toBool();
+    QFont fontVi(fontViFamily, fontViSize);
+    fontVi.setBold(fontViBold);
+    fontVi.setItalic(fontViItalic);
+    m_labelVi -> setFont(fontVi);
+
+    QString colorTextRus = setting.value("colorTextRus", "").toString();
+    m_labelRus -> setStyleSheet(tr("color: %1").arg(colorTextRus));
+
+    QString colorTextVi = setting.value("colorTextVi", "").toString();
+    m_labelVi -> setStyleSheet(tr("color: %1").arg(colorTextVi));
+
+    QString colorWindow = setting.value("colorWindow", "").toString();
+
+    setting.endGroup();
+    m_options = new Options(fontRus, fontVi, colorTextRus, colorTextVi, colorWindow);
+    QObject::connect(m_options, SIGNAL(signalSetOptions(QFont, QFont, QString, QString, QString)), this, SLOT(slotSetOptions(QFont, QFont, QString, QString, QString)));
+    QObject::connect(m_actionOptions, SIGNAL(triggered()), m_options,SLOT(show()));
 }
 
 void CuaSoChinh::hienTuSau()
 {
-    if(m_indexComboBox !=0)
+    if(m_indexComboBox != 0)
     {
         m_index ++;
         if (m_index < int(m_vectorRus.size()))
         {
             m_labelRus -> setText(m_vectorRus[m_index]);
-            m_labelRus -> adjustSize();
             m_labelVi -> setText(m_vectorVi[m_index]);
-            m_labelVi -> adjustSize();
+
         }
         else
         {
             m_labelRus -> setText(m_vectorRus[0]);
-            m_labelRus -> adjustSize();
             m_labelVi -> setText(m_vectorVi[0]);
-            m_labelVi -> adjustSize();
             m_index = 0;
         }
     }
@@ -43,16 +122,12 @@ void CuaSoChinh::hienTuTruoc()
         if (m_index >= 0)
         {
             m_labelRus -> setText(m_vectorRus[m_index]);
-            m_labelRus -> adjustSize();
             m_labelVi -> setText(m_vectorVi[m_index]);
-            m_labelVi -> adjustSize();
         }
         else
         {
             m_labelRus -> setText(m_vectorRus[int(m_vectorRus.size()) - 1]);
-            m_labelRus -> adjustSize();
             m_labelVi -> setText(m_vectorVi[int(m_vectorRus.size()) - 1]);
-            m_labelVi -> adjustSize();
             m_index = int(m_vectorRus.size()) - 1;
         }
     }
@@ -65,8 +140,6 @@ void CuaSoChinh::changeTopic(int iComboBox)
     if(iComboBox != 0)
     {
         QString link = m_listData[iComboBox - 1].filePath();
-        qDebug() << iComboBox << link;
-
         QFile Data(link);
         m_vectorVi.clear();
         m_vectorRus.clear();
@@ -74,6 +147,7 @@ void CuaSoChinh::changeTopic(int iComboBox)
         if(Data.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QTextStream  out(&Data);
+            out.setCodec("UTF-8");
             while (!out.atEnd())
             {
                 m_vectorRus.push_back(out.readLine());
@@ -82,60 +156,27 @@ void CuaSoChinh::changeTopic(int iComboBox)
             Data.close();
         }
 
-        m_labelRus -> setText(m_vectorRus[0]);
-        m_labelRus -> adjustSize();
-        m_labelVi -> setText(m_vectorVi[0]);
-        m_labelVi -> adjustSize();
-
+        if(m_vectorRus.empty() || m_vectorVi.empty())
+        {
+            m_labelRus -> setText(" ");
+            m_labelVi -> setText(" ");
+        }
+        else
+        {
+            m_labelRus -> setText(m_vectorRus[0]);
+            m_labelVi -> setText(m_vectorVi[0]);
+        }
         m_index = 0;
     }
     else
     {
-        m_labelRus -> setText("sdf");
-        m_labelVi -> setText("sdf");
-    }
-}
-
-void CuaSoChinh::setOnTop() //Giu cua so phia tren
-{
-    if (m_setOnTop -> isChecked())
-    {
-        this -> setWindowFlags(Qt::WindowStaysOnTopHint);
-    }
-    else
-    {
-        this -> setWindowFlags(Qt::WindowStaysOnBottomHint);
-    }
-    show();
-}
-
-void CuaSoChinh::setFontNga() //Doi font chu tieng Nga
-{
-    bool ok;
-    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Segoe UI", 26, QFont::Bold), this);
-    if (ok)
-    {
-        m_labelRus -> setFont(kieuChu);
-        m_labelRus -> adjustSize();
-    }
-}
-
-void CuaSoChinh::setFontViet() //Doi font chu tieng Viet
-{
-    bool ok;
-    QFont kieuChu = QFontDialog::getFont(&ok, QFont("Times New Roman", 14), this);
-    if (ok)
-    {
-        m_labelVi -> setFont(kieuChu);
-        m_labelVi-> adjustSize();
+        m_labelRus -> setText("Русский Язык");
+        m_labelVi -> setText("Tiếng Việt");
     }
 }
 
 void CuaSoChinh::createGUI()
 {
-    QWidget *widget = new QWidget; // Tao cua so
-    setCentralWidget(widget); //Importance
-
     setWindowIcon(QIcon("icon.png")); //Tao icon
 
     // Tao Button
@@ -150,41 +191,51 @@ void CuaSoChinh::createGUI()
     m_preview -> setCursor(Qt::PointingHandCursor);
 
     // Tao QLabel
-    m_labelRus = new QLabel("Русский Язык", this);
+    m_labelRus = new QLabel("Русский Язык");
     m_labelRus -> setFont(QFont("Segoe UI", 26, QFont::Bold));
     m_labelRus -> setAlignment(Qt::AlignCenter);
+    m_labelRus -> setAutoFillBackground(true);
 
     m_labelVi = new QLabel("Tiếng Việt", this);
     m_labelVi -> setFont(QFont("Times New Roman",14));
     m_labelVi -> setAlignment(Qt::AlignCenter);
+    m_labelVi -> setAutoFillBackground(true);
 
     // Tao Combo Box
     m_combo = new QComboBox(this);
-    m_combo -> setFixedSize(110, 20);
+    //m_combo -> setFixedSize(110, 20);
     m_combo -> addItem("Chọn chủ đề");
 
-    QDir directory("data");
-
-    m_listData = directory.entryInfoList(QDir::Files);
+    m_listData = m_directory.entryInfoList(QDir::Files);
     foreach (QFileInfo filename, m_listData)
     {
-        qDebug() << filename.filePath();//.baseName();
         m_combo -> addItem(filename.baseName());
     }
 
     // Sap xep Layout
-    QHBoxLayout *layoutNgang = new QHBoxLayout();
-    layoutNgang -> setAlignment(Qt::AlignBottom);
-    QVBoxLayout *layoutDoc = new QVBoxLayout(this);
-    layoutDoc -> setSpacing(15);
+    QHBoxLayout *layoutNgang = new QHBoxLayout;
+    QVBoxLayout *layoutDoc = new QVBoxLayout;
+    QVBoxLayout *layoutText = new QVBoxLayout;
+    //layoutDoc -> setSpacing(15);
 
     layoutNgang -> addWidget(m_combo,0, Qt::AlignLeft);
     layoutNgang -> addWidget(m_preview,1,Qt::AlignRight);
     layoutNgang -> addWidget(m_next,0,Qt::AlignRight);
-    layoutDoc -> addWidget(m_labelRus);
-    layoutDoc -> addWidget(m_labelVi);
+    layoutText -> addWidget(m_labelRus);
+    layoutText -> addWidget(m_labelVi);
+
+    m_frame = new QFrame;
+    m_frame -> setFrameShape(QFrame::Box);
+    m_frame -> setLineWidth(1);
+    m_frame -> setLayout(layoutText);
+    m_frame -> setStyleSheet("background-color: white");
+
+    layoutDoc -> addWidget(m_frame);
     layoutDoc -> addLayout(layoutNgang);
-    widget -> setLayout(layoutDoc); // Importance
+
+    QWidget *widget = new QWidget;
+    widget -> setLayout(layoutDoc);
+    setCentralWidget(widget); //Importance
 
     // Ket noi tin hieu
     QObject::connect(m_next, SIGNAL(clicked()), this, SLOT(hienTuSau()));
@@ -194,72 +245,89 @@ void CuaSoChinh::createGUI()
 
 void CuaSoChinh::createMenu() //Tao Menu
 {
-    QPixmap newpix(":/icon/icon.ico");
     QFont font = QFont("Calibri", 12);
 
-    m_addTopic = new QAction("Thêm chủ đề");
-    m_exit = new QAction("Exit");
     QMenu *menuFile = new QMenu;
     menuFile = menuBar() -> addMenu("&File");
-    menuFile -> addAction(m_addTopic);
+    m_exit = new QAction("Exit");
+    m_exit -> setIcon(QIcon(":/icon/cancel-button.png"));
     menuFile -> addAction(m_exit);
+    QObject::connect(m_exit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
-    m_ngaFont = new QAction(newpix, "Font tiếng Nga", this);
-    m_ngaFont -> setFont(font);
-    m_vietFont = new QAction("Font tiếng Việt", this);
-    m_vietFont -> setFont(font);
-    QMenu *menuFont = new QMenu();
-    menuFont = menuBar() -> addMenu("&Font");
-    menuFont -> addAction(m_ngaFont);
-    menuFont -> addAction(m_vietFont);
+    QMenu *menuSettings = new QMenu;
+    menuSettings = menuBar() -> addMenu("&Tools");
+    m_actionTopic = new QAction("Topics");
+    m_actionTopic -> setIcon(QIcon(":/icon/folder-button.png"));
+    menuSettings -> addAction(m_actionTopic);
+    QObject::connect(m_actionTopic, SIGNAL(triggered()), this, SLOT(slotEditTopic()));
+    m_actionOptions = new QAction("Options");
+    m_actionOptions -> setIcon(QIcon(":/icon/settings-button.png"));
+    menuSettings -> addAction(m_actionOptions);
 
-    m_ngaColor = new QAction("Màu chữ tiếng Nga", this);
-    m_ngaColor -> setFont(font);
-    m_vietColor = new QAction("Màu chữ tiếng Việt", this);
-    m_vietColor -> setFont(font);
-    m_windowColor = new QAction("Màu nền cửa sổ", this);
-    m_windowColor -> setFont(font);
-    QMenu *menuColor = new QMenu();
-    menuColor = menuBar() -> addMenu(("&Color"));
-    menuColor -> addAction(m_ngaColor);
-    menuColor -> addAction(m_vietColor);
-    menuColor -> addAction(m_windowColor);
+    QMenu *menuWindow = new QMenu;
+    menuWindow = menuBar() -> addMenu("Window");
+    m_actionOnTop = new QAction("Set on top");
+    m_actionOnTop -> setCheckable(true);
+    menuWindow -> addAction(m_actionOnTop);
+    QObject::connect(m_actionOnTop, SIGNAL(triggered()), this, SLOT(slotSetOnTop()));
+    m_actionReset = new QAction("Reset");
+    m_actionReset -> setIcon(QIcon(":/icon/reset-button.png"));
+    menuWindow -> addAction(m_actionReset);
+    QObject::connect(m_actionReset, SIGNAL(triggered()), this, SLOT(slotReset()));
 
-    m_setOnTop = new QAction("Set On Top", this);
-    m_setOnTop -> setCheckable(true);
-    m_setOnTop -> setChecked(false);
-    QMenu *onTop = new QMenu();
-    onTop = menuBar() -> addMenu("&On Top");
-    onTop -> addAction(m_setOnTop);
-
-    QObject::connect(m_ngaFont, SIGNAL(triggered()), this, SLOT(setFontNga()));
-    QObject::connect(m_vietFont, SIGNAL(triggered()), this, SLOT(setFontViet()));
-    QObject::connect(m_ngaColor, SIGNAL(triggered()), this, SLOT(ngaColor()));
-    QObject::connect(m_vietColor, SIGNAL(triggered()), this, SLOT(vietColor()));
-    QObject::connect(m_windowColor, SIGNAL(triggered()), this, SLOT(windowColor()));
-    QObject::connect(m_setOnTop, SIGNAL(triggered()), this, SLOT(setOnTop()));
 }
 
-void CuaSoChinh::ngaColor() //Doi mau chu tieng Nga
+void CuaSoChinh::slotEditTopic()
 {
-    QColor mau = QColorDialog::getColor(Qt::black, this);
-    QPalette bangMau;
-    bangMau.setColor(QPalette::WindowText, mau);
-    m_labelRus -> setPalette(bangMau);
+    m_topic -> show();
 }
 
-void CuaSoChinh::vietColor() //Doi mau chu tieng Viet
+void CuaSoChinh::slotUpdateTopic()
 {
-    QColor mau = QColorDialog::getColor(Qt::black, this);
-    QPalette bangMau;
-    bangMau.setColor(QPalette::WindowText, mau);
-    m_labelVi -> setPalette(bangMau);
+    int indexCombo;
+    int countCombo = m_combo -> count();
+    for(indexCombo = countCombo - 1; indexCombo > 0; indexCombo--)
+    {
+        m_combo -> removeItem(indexCombo);
+    }
+//    m_combo -> clear();
+
+    m_listData = m_directory.entryInfoList(QDir::Files);
+    foreach (QFileInfo filename, m_listData)
+    {
+        m_combo -> addItem(filename.baseName());
+    }
 }
 
-void CuaSoChinh::windowColor() //Doi mau nen cua so
+void CuaSoChinh::slotSetOnTop() //Giu cua so phia tren
 {
-    QColor mau = QColorDialog::getColor(Qt::white, this);
-    QPalette bangMau;
-    bangMau.setColor(QPalette::Window, mau);
-    this -> setPalette(bangMau);
+    if (m_actionOnTop -> isChecked())
+    {
+        this -> setWindowFlags(Qt::WindowStaysOnTopHint);
+    }
+    else
+    {
+        this -> setWindowFlags(Qt::WindowStaysOnBottomHint);
+    }
+    show();
+}
+
+void CuaSoChinh::slotSetOptions(QFont fontRus, QFont fontVi, QString colorRus, QString colorVi, QString colorFrame) //Thay doi cai dat
+{
+    m_labelRus -> setFont(fontRus);
+    m_labelVi -> setFont(fontVi);
+}
+
+void CuaSoChinh::slotReset()
+{
+    m_labelRus -> setFont(QFont("Segoe UI", 26, QFont::Bold));
+    m_labelRus -> setText("Русский Язык");
+    m_labelVi -> setFont(QFont("Times New Roman",14));
+    m_labelVi -> setText("Tiếng Việt");
+
+    m_labelRus -> setStyleSheet("color: black");
+    m_labelVi -> setStyleSheet("color: black");
+
+    this -> adjustSize();
+    this -> adjustSize();
 }
